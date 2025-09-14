@@ -54,73 +54,90 @@ export function AuthView() {
   }
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setMessage(null)
+  e.preventDefault()
+  setIsLoading(true)
+  setMessage(null)
 
-    // Validation
-    if (signupData.password !== signupData.confirmPassword) {
-      setMessage({ type: "error", text: "Passwords do not match" })
-      setIsLoading(false)
-      return
-    }
+  // Validation
+  if (signupData.password !== signupData.confirmPassword) {
+    setMessage({ type: "error", text: "Passwords do not match" })
+    setIsLoading(false)
+    return
+  }
 
-    if (signupData.password.length < 6) {
-      setMessage({ type: "error", text: "Password must be at least 6 characters long" })
-      setIsLoading(false)
-      return
-    }
+  if (signupData.password.length < 6) {
+    setMessage({ type: "error", text: "Password must be at least 6 characters long" })
+    setIsLoading(false)
+    return
+  }
 
-    if (!signupData.fullName.trim()) {
-      setMessage({ type: "error", text: "Full name is required" })
-      setIsLoading(false)
-      return
-    }
+  if (!signupData.fullName.trim()) {
+    setMessage({ type: "error", text: "Full name is required" })
+    setIsLoading(false)
+    return
+  }
 
-    if (!signupData.course) {
-      setMessage({ type: "error", text: "Please select a course" })
-      setIsLoading(false)
-      return
-    }
+  if (!signupData.course) {
+    setMessage({ type: "error", text: "Please select a course" })
+    setIsLoading(false)
+    return
+  }
 
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: signupData.email,
-        password: signupData.password,
-        options: {
-          data: {
-            full_name: signupData.fullName,
-            course: signupData.course,
-            avatar_url: null,
-          },
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: signupData.email,
+      password: signupData.password,
+      options: {
+        data: {
+          full_name: signupData.fullName,
+          course: signupData.course,
+          avatar_url: null,
         },
+      },
+    })
+
+    if (error) {
+      setMessage({ type: "error", text: error.message })
+    } else if (data.user) {
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: data.user.id,
+        full_name: signupData.fullName,
+        course: signupData.course,
+        xp: 0,
+        level: 1,
+        streak: 1,
+        last_activity: new Date().toISOString().split("T")[0],
+        badges: [],
+        completed_lessons: 0,
+        completed_quizzes: 0,
+        total_study_hours: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
 
-      if (error) {
-        setMessage({ type: "error", text: error.message })
-      } else {
-        setMessage({
-          type: "success",
-          text: "Account created successfully! Welcome to LASU Learn! 🎉",
-        })
-
-        // Clear form
-        setSignupData({ email: "", password: "", confirmPassword: "", fullName: "", course: "" })
-
-        // If user is immediately logged in (email confirmation disabled)
-        if (data.user && !data.user.email_confirmed_at) {
-          setMessage({
-            type: "success",
-            text: "Account created! Please check your email to verify your account before signing in.",
-          })
-        }
+      if (profileError) {
+        console.error("🔴 Profile Insert Error:", profileError.message)
+        setMessage({ type: "error", text: `Profile save failed: ${profileError.message}` })
+        return
       }
-    } catch (error) {
-      setMessage({ type: "error", text: "An unexpected error occurred" })
-    } finally {
-      setIsLoading(false)
+
+      setMessage({
+        type: "success",
+        text: data.user.email_confirmed_at
+          ? "Account created successfully! Welcome to LASU Learn! 🎉"
+          : "Account created! Please check your email to verify your account before signing in.",
+      })
+
+      // Clear form
+      setSignupData({ email: "", password: "", confirmPassword: "", fullName: "", course: "" })
     }
+  } catch (error) {
+    console.error("🔴 Unexpected error:", error)
+    setMessage({ type: "error", text: "An unexpected error occurred" })
+  } finally {
+    setIsLoading(false)
   }
+}
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)

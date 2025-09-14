@@ -112,6 +112,12 @@ export function DashboardContent() {
     },
   ]
 
+  // Calculate average quiz score from progress data
+  const averageQuizScore =
+    progress?.quizzes && progress.quizzes.length > 0
+      ? progress.quizzes.reduce((sum: number, quiz: any) => sum + (quiz.percentage || 0), 0) / progress.quizzes.length
+      : 0
+
   // Recent activity from real data
   const recentActivity = [
     ...(progress?.lessons?.slice(0, 3).map((lesson: any) => ({
@@ -247,7 +253,7 @@ export function DashboardContent() {
             ) : (
               <>
                 <p className="text-green-700">
-                  Great progress! You've completed {profile.completed_lessons} lessons and earned {profile.xp} XP. Keep
+                  Great progress! You've completed {profile?.completed_lessons || 0} lessons and earned {profile?.xp || 0} XP. Keep
                   up the momentum!
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -256,18 +262,13 @@ export function DashboardContent() {
                       <TrendingUp className="h-5 w-5 text-green-600" />
                       <span className="font-semibold text-green-800">This Week</span>
                     </div>
-                    <div className="text-2xl font-bold text-green-700">{profile.weekly_xp || 0} XP</div>
+                    <div className="text-2xl font-bold text-green-700">{progress?.weekly_xp ? progress.weekly_xp : 0} XP</div>
                     <div className="text-sm text-green-600">Weekly progress</div>
-                  </div>
-                  <div className="p-4 bg-white rounded-lg border border-green-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-5 w-5 text-green-600" />
-                      <span className="font-semibold text-green-800">Average Score</span>
-                    </div>
                     <div className="text-2xl font-bold text-green-700">
-                      {Math.round(profile.average_quiz_score || 0)}%
+                      {Math.round(averageQuizScore)}%
                     </div>
                     <div className="text-sm text-green-600">Quiz performance</div>
+                    <span className="font-semibold text-green-800">Average Score</span>
                   </div>
                 </div>
               </>

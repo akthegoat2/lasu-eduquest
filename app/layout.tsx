@@ -1,17 +1,25 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import localFont from "next/font/local"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+// ✅ Local fallback font
+const inter = localFont({
+  src: "../public/fonts/Inter-Regular.woff2",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "LASU Learn - Computer Science E-Learning Platform",
   description: "Interactive learning platform for Computer Science students at Lagos State University",
-  keywords: ["e-learning", "computer science", "LASU", "education", "programming", "web development"],
+  keywords: [
+    "e-learning",
+    "computer science",
+    "LASU",
+    "education",
+    "programming",
+    "web development",
+  ],
   authors: [{ name: "LASU Computer Science Department" }],
-  viewport: "width=device-width, initial-scale=1",
-  themeColor: "#3b82f6",
   openGraph: {
     title: "LASU Learn - Computer Science E-Learning Platform",
     description: "Interactive learning platform for Computer Science students at Lagos State University",
@@ -23,24 +31,21 @@ export const metadata: Metadata = {
     title: "LASU Learn - Computer Science E-Learning Platform",
     description: "Interactive learning platform for Computer Science students at Lagos State University",
   },
-    generator: 'v0.dev'
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+// ✅ New Next.js 14 metadata fields
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+}
+
+export const themeColor = "#3b82f6"
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body className={inter.className} suppressHydrationWarning>
-        {children}
-      </body>
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }
+
